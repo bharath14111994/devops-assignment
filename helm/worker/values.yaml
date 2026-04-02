@@ -1,0 +1,13 @@
+appName: worker
+replicaCount: 1
+
+image:
+  repository: dockersamples/examplevotingapp_worker
+  tag: latest
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 80
+
+env: []

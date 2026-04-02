@@ -1,0 +1,14 @@
+appName: vote
+replicaCount: 1
+
+image:
+  repository: dockersamples/examplevotingapp_vote
+  tag: latest
+
+service:
+  type: NodePort
+  port: 80
+  targetPort: 80
+  nodePort: 31000
+
+env: []
