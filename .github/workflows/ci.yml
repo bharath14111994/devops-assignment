@@ -1,0 +1,92 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "push" ] && [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "VERSION=1.0.${{ github.run_number }}" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=pr-${{ github.event.number }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build and push vote image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./app/vote
+          push: ${{ github.ref == 'refs/heads/main' }}
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/vote:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/vote:${{ steps.version.outputs.VERSION }}
+
+      - name: Build and push result image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./app/result
+          push: ${{ github.ref == 'refs/heads/main' }}
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/result:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/result:${{ steps.version.outputs.VERSION }}
+
+      - name: Build and push worker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./app/worker
+          push: ${{ github.ref == 'refs/heads/main' }}
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/worker:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/worker:${{ steps.version.outputs.VERSION }}
+
+  lint-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.14.0
+
+      - name: Lint Helm charts
+        run: |
+          helm lint ./helm/vote
+          helm lint ./helm/result
+          helm lint ./helm/worker
+          helm lint ./helm/redis
+          helm lint ./helm/db
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.14.8
+
+      - name: Terraform validate
+        run: |
+          cd terraform
+          terraform init -backend=false
+          terraform validate
