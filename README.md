@@ -106,3 +106,42 @@ GitHub Actions pipeline includes:
 - App-of-Apps pattern implemented
 - All applications managed via Git
 - Automated sync with self-healing enabled
+
+## Production Architecture
+┌─────────────────────────────────────┐
+                     │           GitHub Repository          │
+                     └──────────────┬──────────────────────┘
+                                    │
+                     ┌──────────────▼──────────────────────┐
+                     │         GitHub Actions CI            │
+                     │  Build → Test → Scan → Push Images  │
+                     └──────────────┬──────────────────────┘
+                                    │
+                     ┌──────────────▼──────────────────────┐
+                     │            Docker Hub                │
+                     │     vote | result | worker           │
+                     └──────────────┬──────────────────────┘
+                                    │
+                     ┌──────────────▼──────────────────────┐
+                     │              ArgoCD                  │
+                     │         GitOps Controller            │
+                     └──────────────┬──────────────────────┘
+                                    │
+                     ┌──────────────▼──────────────────────┐
+                     │           AWS EKS Cluster            │
+                     │                                      │
+                     │  ┌─────────┐      ┌─────────────┐  │
+                     │  │  Vote   │      │   Result    │  │
+                     │  │  App    │      │    App      │  │
+                     │  └────┬────┘      └──────┬──────┘  │
+                     │       │                  │          │
+                     │  ┌────▼────┐      ┌──────▼──────┐  │
+                     │  │  Redis  │      │  PostgreSQL  │  │
+                     │  │  Cache  │      │  (AWS RDS)  │  │
+                     │  └─────────┘      └─────────────┘  │
+                     │                                      │
+                     │  ┌─────────────────────────────┐   │
+                     │  │    Prometheus + Grafana      │   │
+                     │  │      Monitoring Stack        │   │
+                     │  └─────────────────────────────┘   │
+                     └─────────────────────────────────────┘
