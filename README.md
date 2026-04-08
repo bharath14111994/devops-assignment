@@ -80,6 +80,12 @@ Open http://localhost:5001 for results
 - Version bumping only happens on merge to main
 - Feature branches build without version bumping
 
+### Branching Strategy Alternatives
+- GitFlow - uses develop, release, hotfix branches - good for versioned releases
+- Trunk-based development - everyone commits to main frequently - good for CI/CD
+- GitHub Flow - simple feature branch + PR model (what we use) - good for continuous deployment
+- We chose GitHub Flow because it is simple, works well with CI/CD, and encourages frequent merges
+
 ## Project Structure
 devops-assignment/
 ├── .github/workflows/ci.yml              # GitHub Actions CI pipeline
@@ -145,6 +151,14 @@ GitHub Actions pipeline includes:
 - All applications managed via Git
 - Automated sync with self-healing enabled
 - Dev environment variable injection via values-dev.yaml
+
+### App-of-Apps Pattern Explanation
+The App-of-Apps pattern works as follows:
+- A parent ArgoCD application points to the argocd/ directory in Git
+- This directory contains child application manifests (vote, result, worker, redis, db)
+- When the parent syncs, it automatically creates all child applications
+- All applications are managed via Git - any change to manifests triggers automatic sync
+- This is the industry standard for managing multiple applications in ArgoCD
 
 ### ApplicationSet Generator Choice
 We used the **List generator** because:
