@@ -71,6 +71,28 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/worker:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/worker:${{ steps.version.outputs.VERSION }}
 
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          cd app/vote
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+
+      - name: Run unit tests with coverage
+        run: |
+          cd app/vote
+          pytest tests.py -v --cov=app --cov-report=term-missing --cov-fail-under=50
+
   lint-and-validate:
     runs-on: ubuntu-latest
     steps:
