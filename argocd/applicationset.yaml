@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cncf-stack
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - app: prometheus
+            namespace: monitoring
+            repoURL: https://prometheus-community.github.io/helm-charts
+            chart: kube-prometheus-stack
+            targetRevision: "45.7.1"
+          - app: grafana
+            namespace: monitoring
+            repoURL: https://grafana.github.io/helm-charts
+            chart: grafana
+            targetRevision: "6.50.7"
+  template:
+    metadata:
+      name: '{{app}}'
+      namespace: argocd
+    spec:
+      project: default
+      source:
+        repoURL: '{{repoURL}}'
+        chart: '{{chart}}'
+        targetRevision: '{{targetRevision}}'
+        helm:
+          values: |
+            adminPassword: admin123
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

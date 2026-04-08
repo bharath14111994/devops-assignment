@@ -1,4 +1,5 @@
-FROM node:18-slim
+# Stage 1: Builder
+FROM node:18-slim AS builder
 
 # add curl for healthcheck
 RUN apt-get update && \
@@ -7,15 +8,22 @@ RUN apt-get update && \
 
 WORKDIR /usr/local/app
 
-# have nodemon available for local dev use (file watching)
-RUN npm install -g nodemon
-
 COPY package*.json ./
 
 RUN npm ci && \
- npm cache clean --force && \
- mv /usr/local/app/node_modules /node_modules
+    npm cache clean --force && \
+    mv /usr/local/app/node_modules /node_modules
 
+# Stage 2: Production
+FROM node:18-slim AS production
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl tini && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /usr/local/app
+
+COPY --from=builder /node_modules /node_modules
 COPY . .
 
 ENV PORT=80
