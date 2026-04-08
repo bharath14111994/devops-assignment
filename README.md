@@ -135,6 +135,8 @@ GitHub Actions pipeline includes:
 - Helm chart appVersion alignment with app version
 - Helm chart linting
 - Terraform validation
+- Unit tests with coverage (minimum 50% required)
+- kube-score Helm template security scanning
 - Trivy security scanning (fails on CRITICAL vulnerabilities)
 
 ## ArgoCD GitOps
@@ -166,6 +168,7 @@ We used the **List generator** because:
 - Pipeline fails on CRITICAL severity vulnerabilities
 - Docker Hub credentials stored as GitHub Secrets
 - Found vulnerability: CVE-2023-45853 in zlib1g (correctly detected)
+kube-score scans rendered Helm templates for misconfigurations
 
 ## Monitoring
 - Prometheus collects metrics from all pods
