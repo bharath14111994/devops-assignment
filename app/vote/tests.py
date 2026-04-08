@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch, MagicMock
 from app import app
 
 class VoteAppTestCase(unittest.TestCase):
@@ -20,7 +21,10 @@ class VoteAppTestCase(unittest.TestCase):
         response = self.app.get('/metrics')
         self.assertEqual(response.status_code, 200)
 
-    def test_vote_post(self):
+    @patch('app.get_redis')
+    def test_vote_post(self, mock_redis):
+        mock_redis_instance = MagicMock()
+        mock_redis.return_value = mock_redis_instance
         response = self.app.post('/', data={'vote': 'a'})
         self.assertEqual(response.status_code, 200)
 
