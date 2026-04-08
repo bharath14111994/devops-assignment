@@ -22,3 +22,8 @@ output "vpc_id" {
   description = "VPC ID"
   value       = aws_vpc.main.id
 }
+
+output "load_balancer_dns" {
+  description = "Load Balancer DNS name"
+  value       = aws_lb.main.dns_name
+}

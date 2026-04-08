@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.appName }}-config
+  labels:
+    app: {{ .Values.appName }}
+data:
+  OPTION_A: {{ .Values.config.optionA | default "Cats" | quote }}
+  OPTION_B: {{ .Values.config.optionB | default "Dogs" | quote }}

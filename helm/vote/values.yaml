@@ -12,3 +12,7 @@ service:
   nodePort: 31000
 
 env: []
+
+config:
+  optionA: "Cats"
+  optionB: "Dogs"
