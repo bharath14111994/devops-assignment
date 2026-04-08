@@ -144,6 +144,17 @@ GitHub Actions pipeline includes:
 - Automated sync with self-healing enabled
 - Dev environment variable injection via values-dev.yaml
 
+### ApplicationSet Generator Choice
+We used the **List generator** because:
+- Simple and explicit - each app is clearly defined
+- Easy to understand and maintain
+- Perfect for a fixed set of known applications (Prometheus + Grafana)
+
+### Alternative Generators
+- **Git generator** - discovers apps automatically from Git directory structure
+- **Cluster generator** - deploys same app to multiple clusters
+- **Matrix generator** - combines multiple generators for complex scenarios
+
 ## Helm Charts
 - Library chart implements DRY principle (shared deployment + service templates)
 - ConfigMaps for web server configuration (OPTION_A, OPTION_B)
